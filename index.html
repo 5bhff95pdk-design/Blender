@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1e1e1e" />
+  <title>Blender Mobile — Clone Tactile</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="top-left">
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <span>Blender</span>
+          <span class="mobile-badge">MOBILE</span>
+        </div>
+        <div class="top-menu desktop-only">
+          <button class="menu-btn" data-menu="file">Fichier</button>
+          <button class="menu-btn" data-menu="edit">Édition</button>
+          <button class="menu-btn" data-menu="object">Objet</button>
+          <button class="menu-btn" data-menu="view">Vue</button>
+        </div>
+      </div>
+      <div class="top-center">
+        <div class="mode-selector">
+          <select id="modeSelect">
+            <option value="OBJECT">Mode Objet</option>
+            <option value="EDIT">Mode Édition</option>
+            <option value="SCULPT">Mode Sculpture</option>
+          </select>
+        </div>
+        <div class="shading-modes">
+          <button class="shade-btn active" data-shade="solid" title="Solid"><span>●</span></button>
+          <button class="shade-btn" data-shade="wireframe" title="Wireframe"><span>◫</span></button>
+          <button class="shade-btn" data-shade="material" title="Material"><span>◉</span></button>
+          <button class="shade-btn" data-shade="rendered" title="Rendered"><span>◍</span></button>
+        </div>
+      </div>
+      <div class="top-right">
+        <button class="icon-btn" id="addBtn" title="Ajouter (Shift+A)">＋ Ajouter</button>
+        <button class="icon-btn primary" id="renderBtn" title="Rendu">▶ Rendu</button>
+        <button class="icon-btn desktop-only" id="saveBtn">💾</button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+      <!-- Left Toolbar - Blender style -->
+      <aside class="left-toolbar" id="leftToolbar">
+        <div class="tool-group">
+          <button class="tool-btn active" data-tool="select" title="Sélection (W)">
+            <span class="tool-icon">↖</span>
+          </button>
+          <button class="tool-btn" data-tool="cursor" title="Curseur 3D">
+            <span class="tool-icon">⊕</span>
+          </button>
+        </div>
+        <div class="tool-group">
+          <button class="tool-btn" data-tool="move" title="Déplacer (G)">
+            <span class="tool-icon">↔</span>
+          </button>
+          <button class="tool-btn" data-tool="rotate" title="Rotation (R)">
+            <span class="tool-icon">↻</span>
+          </button>
+          <button class="tool-btn" data-tool="scale" title="Échelle (S)">
+            <span class="tool-icon">⤢</span>
+          </button>
+          <button class="tool-btn" data-tool="transform" title="Transformer">
+            <span class="tool-icon">◫</span>
+          </button>
+        </div>
+        <div class="tool-group">
+          <button class="tool-btn" data-tool="extrude" title="Extruder (E)">
+            <span class="tool-icon">⬆</span>
+          </button>
+          <button class="tool-btn" data-tool="inset" title="Inset (I)">
+            <span class="tool-icon">▭</span>
+          </button>
+          <button class="tool-btn" data-tool="bevel" title="Biseau (Ctrl+B)">
+            <span class="tool-icon">⬔</span>
+          </button>
+          <button class="tool-btn" data-tool="loopcut" title="Loop Cut">
+            <span class="tool-icon">╌</span>
+          </button>
+        </div>
+        <div class="tool-group sculpt-only">
+          <button class="tool-btn" data-tool="sculpt-draw" title="Draw">
+            <span class="tool-icon">✏</span>
+          </button>
+          <button class="tool-btn" data-tool="sculpt-smooth" title="Smooth">
+            <span class="tool-icon">〰</span>
+          </button>
+          <button class="tool-btn" data-tool="sculpt-inflate" title="Inflate">
+            <span class="tool-icon">○</span>
+          </button>
+          <button class="tool-btn" data-tool="sculpt-grab" title="Grab">
+            <span class="tool-icon">✋</span>
+          </button>
+        </div>
+        <div class="tool-group">
+          <button class="tool-btn" data-tool="measure" title="Mesure">
+            <span class="tool-icon">📏</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Viewport -->
+      <main class="viewport-wrap" id="viewportWrap">
+        <canvas id="c"></canvas>
+        
+        <!-- Viewport Overlays -->
+        <div class="viewport-header">
+          <div class="view-info">
+            <span id="viewInfo">Persp | Solide | Cube (1)</span>
+            <span class="fps" id="fpsCounter">60 fps</span>
+          </div>
+          <div class="view-controls">
+            <button class="view-btn" id="focusBtn" title="Focus (Numpad .)">◎</button>
+            <button class="view-btn" id="orthoBtn" title="Ortho/Persp">◫</button>
+            <button class="view-btn" id="xrayBtn" title="X-Ray (Alt+Z)">👁</button>
+          </div>
+        </div>
+
+        <!-- Gizmo Orientation -->
+        <div class="gizmo-corner" id="gizmoCorner"></div>
+
+        <!-- Transform HUD -->
+        <div class="transform-hud" id="transformHud">
+          <div class="hud-row"><span>D:</span><input id="hudX" value="0.0" /><input id="hudY" value="0.0" /><input id="hudZ" value="0.0" /></div>
+        </div>
+
+        <!-- Add Menu Popup -->
+        <div class="popup add-popup" id="addPopup">
+          <div class="popup-section">
+            <h4>Mesh</h4>
+            <button data-add="cube">Cube</button>
+            <button data-add="sphere">UV Sphere</button>
+            <button data-add="ico">Ico Sphere</button>
+            <button data-add="cylinder">Cylindre</button>
+            <button data-add="plane">Plan</button>
+            <button data-add="torus">Tore</button>
+            <button data-add="monkey">Suzanne</button>
+            <button data-add="cone">Cône</button>
+          </div>
+          <div class="popup-section">
+            <h4>Lumière</h4>
+            <button data-add="light-point">Point</button>
+            <button data-add="light-sun">Soleil</button>
+            <button data-add="light-spot">Spot</button>
+          </div>
+          <div class="popup-section">
+            <h4>Caméra</h4>
+            <button data-add="camera">Caméra</button>
+          </div>
+        </div>
+
+        <!-- Mobile Touch Hints -->
+        <div class="touch-hints" id="touchHints">
+          <span>1 doigt: Sélection</span>
+          <span>2 doigts: Orbite / Zoom</span>
+          <span>Appui long: Menu</span>
+        </div>
+      </main>
+
+      <!-- Right Sidebar -->
+      <aside class="right-panel" id="rightPanel">
+        <div class="panel-tabs">
+          <button class="tab-btn active" data-tab="outliner" title="Outliner">☰</button>
+          <button class="tab-btn" data-tab="properties" title="Propriétés">◫</button>
+          <button class="tab-btn" data-tab="material" title="Matériau">●</button>
+          <button class="tab-btn" data-tab="modifiers" title="Modificateurs">🔧</button>
+          <button class="tab-btn" data-tab="world" title="Monde">🌍</button>
+        </div>
+
+        <div class="panel-content">
+          <!-- Outliner -->
+          <div class="panel-section active" id="tab-outliner">
+            <div class="section-header">
+              <h3>Outliner</h3>
+              <button class="small-btn" id="newCollectionBtn">＋</button>
+            </div>
+            <div class="search-box">
+              <input type="text" placeholder="Filtrer..." id="outlinerSearch" />
+            </div>
+            <div class="outliner-list" id="outlinerList"></div>
+            <div class="section-header mt">
+              <h3>Historique</h3>
+            </div>
+            <div class="history-list" id="historyList"></div>
+          </div>
+
+          <!-- Properties -->
+          <div class="panel-section" id="tab-properties">
+            <div class="section-header"><h3>Objet</h3></div>
+            <div class="prop-group">
+              <label>Nom</label>
+              <input type="text" id="objName" value="Cube" />
+            </div>
+            <div class="prop-group">
+              <label>Transformations</label>
+              <div class="transform-grid">
+                <div class="tg-row">
+                  <span class="tg-label">Position</span>
+                  <input type="number" id="posX" step="0.1" value="0" />
+                  <input type="number" id="posY" step="0.1" value="0" />
+                  <input type="number" id="posZ" step="0.1" value="0" />
+                </div>
+                <div class="tg-row">
+                  <span class="tg-label">Rotation</span>
+                  <input type="number" id="rotX" step="5" value="0" />
+                  <input type="number" id="rotY" step="5" value="0" />
+                  <input type="number" id="rotZ" step="5" value="0" />
+                </div>
+                <div class="tg-row">
+                  <span class="tg-label">Échelle</span>
+                  <input type="number" id="scaleX" step="0.1" value="1" />
+                  <input type="number" id="scaleY" step="0.1" value="1" />
+                  <input type="number" id="scaleZ" step="0.1" value="1" />
+                </div>
+              </div>
+            </div>
+            <div class="prop-group">
+              <label>Visibilité</label>
+              <div class="check-row">
+                <label><input type="checkbox" id="visViewport" checked /> Viewport</label>
+                <label><input type="checkbox" id="visRender" checked /> Rendu</label>
+              </div>
+            </div>
+            <div class="prop-actions">
+              <button class="action-btn" id="duplicateBtn">Dupliquer (Shift+D)</button>
+              <button class="action-btn danger" id="deleteBtn">Supprimer (X)</button>
+              <button class="action-btn" id="centerBtn">Centrer Origine</button>
+            </div>
+          </div>
+
+          <!-- Material -->
+          <div class="panel-section" id="tab-material">
+            <div class="section-header"><h3>Matériau</h3><button class="small-btn" id="newMatBtn">＋ Nouveau</button></div>
+            <div id="materialList"></div>
+            <div class="prop-group" id="materialProps">
+              <label>Couleur de base</label>
+              <input type="color" id="baseColor" value="#ff8a2a" />
+              <label>Métallique <span id="metalVal">0.1</span></label>
+              <input type="range" id="metallic" min="0" max="1" step="0.01" value="0.1" />
+              <label>Rugosité <span id="roughVal">0.5</span></label>
+              <input type="range" id="roughness" min="0" max="1" step="0.01" value="0.5" />
+              <label>Émission</label>
+              <input type="color" id="emissiveColor" value="#000000" />
+            </div>
+          </div>
+
+          <!-- Modifiers -->
+          <div class="panel-section" id="tab-modifiers">
+            <div class="section-header"><h3>Modificateurs</h3><button class="small-btn" id="addModBtn">Ajouter</button></div>
+            <div id="modifierList"></div>
+            <div class="mod-presets">
+              <button class="mod-btn" data-mod="subsurf">Subdivision</button>
+              <button class="mod-btn" data-mod="mirror">Miroir</button>
+              <button class="mod-btn" data-mod="array">Réseau</button>
+              <button class="mod-btn" data-mod="solidify">Solidify</button>
+              <button class="mod-btn" data-mod="bevel">Bevel</button>
+            </div>
+          </div>
+
+          <!-- World -->
+          <div class="panel-section" id="tab-world">
+            <div class="section-header"><h3>Monde & Rendu</h3></div>
+            <div class="prop-group">
+              <label>Fond</label>
+              <input type="color" id="worldColor" value="#1a1a1e" />
+              <label>Intensité HDRI</label>
+              <input type="range" id="worldIntensity" min="0" max="2" step="0.05" value="0.8" />
+            </div>
+            <div class="prop-group">
+              <label>Grille</label>
+              <div class="check-row">
+                <label><input type="checkbox" id="showGrid" checked /> Afficher</label>
+                <label><input type="checkbox" id="showAxes" checked /> Axes</label>
+              </div>
+            </div>
+            <div class="prop-group">
+              <label>Ombres</label>
+              <div class="check-row">
+                <label><input type="checkbox" id="showShadows" checked /> Activer</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Bottom Bar -->
+    <footer class="bottombar">
+      <div class="bottom-left">
+        <div class="pivot-controls">
+          <button class="pivot-btn" title="Point pivot">⌖</button>
+          <select id="pivotSelect">
+            <option>Median Point</option>
+            <option>Individual Origins</option>
+            <option>3D Cursor</option>
+          </select>
+        </div>
+        <div class="snap-controls">
+          <button class="snap-btn" id="snapBtn" title="Snapping">🧲</button>
+          <select id="snapSelect"><option>Increment</option><option>Vertex</option><option>Face</option></select>
+        </div>
+        <div class="proportional">
+          <button class="prop-btn" id="propBtn" title="Édition proportionnelle">◍</button>
+        </div>
+      </div>
+      <div class="bottom-center">
+        <div class="timeline-scrub">
+          <button>◀◀</button>
+          <button>◀</button>
+          <button class="play">▶</button>
+          <button>▶</button>
+          <button>▶▶</button>
+          <span>1 / 250</span>
+        </div>
+      </div>
+      <div class="bottom-right">
+        <span class="stats" id="stats">Verts: 8 | Faces: 6 | Tris: 12 | Objets: 1</span>
+        <button class="icon-btn small" id="toggleRightBtn">◀</button>
+      </div>
+    </footer>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="mobile-nav" id="mobileNav">
+      <button class="mnav-btn active" data-mtab="viewport"><span>◫</span><small>Vue</small></button>
+      <button class="mnav-btn" data-mtab="tools"><span>🔧</span><small>Outils</small></button>
+      <button class="mnav-btn" data-mtab="add"><span>＋</span><small>Ajouter</small></button>
+      <button class="mnav-btn" data-mtab="props"><span>⚙</span><small>Props</small></button>
+      <button class="mnav-btn" data-mtab="render"><span>▶</span><small>Rendu</small></button>
+    </nav>
+
+    <!-- Mobile Sheets -->
+    <div class="mobile-sheet" id="mobileSheetTools">
+      <div class="sheet-handle"></div>
+      <div class="sheet-content">
+        <h3>Outils</h3>
+        <div class="mobile-tools-grid" id="mobileToolsGrid"></div>
+      </div>
+    </div>
+
+    <!-- Render Overlay -->
+    <div class="render-overlay" id="renderOverlay">
+      <div class="render-top">
+        <span>Blender Render — Cycles Mobile</span>
+        <button id="closeRenderBtn">✕ Fermer</button>
+      </div>
+      <canvas id="renderCanvas"></canvas>
+      <div class="render-bottom">
+        <span id="renderInfo">1920x1080 | 128 samples | 2.3s</span>
+        <div class="render-actions">
+          <button id="saveRenderBtn">Sauvegarder Image</button>
+          <button id="exportGltfBtn">Exporter GLTF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+      <button data-action="duplicate">Dupliquer</button>
+      <button data-action="delete">Supprimer</button>
+      <button data-action="hide">Masquer</button>
+      <button data-action="focus">Vue sur sélection</button>
+      <hr/>
+      <button data-action="shade-smooth">Ombrage lissé</button>
+      <button data-action="shade-flat">Ombrage plat</button>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
