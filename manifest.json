@@ -1,0 +1,9 @@
+{
+  "name": "Blender Mobile",
+  "short_name": "BlenderM",
+  "description": "Clone Blender tactile pour mobile",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1e1e",
+  "theme_color": "#eb7700"
+}
