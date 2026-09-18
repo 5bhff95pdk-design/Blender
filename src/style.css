@@ -726,3 +726,109 @@ body.mode-sculpt .sculpt-only { display:flex; }
 
 /* Utilities */
 .mt { margin-top:16px; }
+
+/* ===== Ajouts refactor : menus, onglets édition, gizmo navigation ===== */
+
+/* Menus déroulants (Fichier / Édition / Objet / Vue) */
+.menu-wrap { position:relative; }
+.menu-dropdown {
+  display:none;
+  position:absolute;
+  top:calc(100% + 2px);
+  left:0;
+  min-width:190px;
+  background:var(--bg-2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5);
+  padding:4px;
+  z-index:500;
+}
+.menu-dropdown.visible { display:block; }
+.menu-item {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  width:100%;
+  background:transparent;
+  border:none;
+  color:var(--text);
+  padding:7px 10px;
+  border-radius:var(--radius-sm);
+  font-size:12px;
+  cursor:pointer;
+  text-align:left;
+}
+.menu-item:hover { background:var(--accent-dim); color:var(--accent); }
+.menu-item.disabled { opacity:0.35; pointer-events:none; }
+.menu-item kbd {
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px;
+  color:var(--text-dim);
+  background:var(--bg-3);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:1px 5px;
+}
+.menu-sep { border:none; border-top:1px solid var(--border); margin:4px 6px; }
+
+/* Onglets du mode Édition (sommets / faces) */
+.edit-tabs { display:none; gap:2px; margin-left:6px; }
+.edit-tabs.visible { display:flex; }
+.etab-btn {
+  background:var(--bg-3);
+  border:1px solid var(--border);
+  color:var(--text-dim);
+  font-size:10px;
+  padding:3px 8px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  white-space:nowrap;
+}
+.etab-btn.active { background:var(--accent-dim); color:var(--accent); border-color:var(--accent); }
+
+/* Outil désactivé (Loop Cut à venir) */
+.tool-btn.disabled { opacity:0.3; cursor:not-allowed; }
+
+/* Œil de visibilité outliner (bouton) */
+.oi-vis {
+  background:transparent;
+  border:none;
+  color:inherit;
+  font-size:12px;
+  padding:2px 4px;
+  cursor:pointer;
+  opacity:0.5;
+  border-radius:3px;
+}
+.oi-vis:hover { opacity:1; background:var(--bg-3); }
+
+/* Retrait de modificateur */
+.mod-remove { color:var(--text-dim); }
+.mod-remove:hover { color:#ff5555; }
+
+/* Gizmo de navigation (coin haut-droit) */
+.gizmo-corner { pointer-events:none; }
+.gizmo-dot {
+  position:absolute;
+  top:0; left:0;
+  width:22px; height:22px;
+  border-radius:50%;
+  border:1.5px solid;
+  background:rgba(20,20,24,0.85);
+  font-size:9px;
+  font-weight:700;
+  line-height:19px;
+  text-align:center;
+  cursor:pointer;
+  pointer-events:auto;
+  padding:0;
+  transition:transform 0.05s linear;
+}
+.gizmo-dot.filled { background:currentColor; }
+.gizmo-dot.hollow { background:rgba(20,20,24,0.85); }
+.gizmo-dot:hover { scale:1.25; }
+
+/* Historique : entrées récentes en premier */
+.history-item { padding:2px 0; border-bottom:1px dashed rgba(255,255,255,0.04); }
