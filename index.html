@@ -35,6 +35,10 @@
             <option value="EDIT">Mode Édition</option>
             <option value="SCULPT">Mode Sculpture</option>
           </select>
+          <div class="edit-tabs" id="editTabs">
+            <button class="etab-btn active" data-emode="vertex" title="Sélection de sommets (1)">▪ Sommets</button>
+            <button class="etab-btn" data-emode="face" title="Sélection de faces (3)">▲ Faces</button>
+          </div>
         </div>
         <div class="shading-modes">
           <button class="shade-btn active" data-shade="solid" title="Solid"><span>●</span></button>
@@ -46,7 +50,7 @@
       <div class="top-right">
         <button class="icon-btn" id="addBtn" title="Ajouter (Shift+A)">＋ Ajouter</button>
         <button class="icon-btn primary" id="renderBtn" title="Rendu">▶ Rendu</button>
-        <button class="icon-btn desktop-only" id="saveBtn">💾</button>
+        <button class="icon-btn desktop-only" id="saveBtn" title="Sauvegarder la scène (Ctrl+S)">💾</button>
       </div>
     </header>
 
